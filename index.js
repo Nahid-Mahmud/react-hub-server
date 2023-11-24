@@ -77,6 +77,12 @@ async function run() {
       res.send(posts);
     });
 
+    // get all post count
+    app.get("/posts-count", async (req, res) => {
+      const postsCount = await postsCollection.estimatedDocumentCount();
+      res.send({ postsCount });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -92,7 +98,7 @@ run().catch(console.dir);
 //mongodb codes end
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send({ status: "React Hub is running" });
 });
 
 app.listen(port, () => {
