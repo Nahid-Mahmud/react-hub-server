@@ -30,7 +30,12 @@ async function run() {
 
     // my codes here
     const usersCollection = client.db("reactHubDb").collection("users");
+    const tagsCollection = client.db("reactHubDb").collection("tags");
+    const announcementsCollection = client
+      .db("reactHubDb")
+      .collection("announcements");
 
+    // announcements
     // post users
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -44,6 +49,25 @@ async function run() {
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
+    });
+
+    // get all users
+    app.get("/users", async (req, res) => {
+      const users = await usersCollection.find({}).toArray();
+      res.send(users);
+    });
+
+    // get all tags
+
+    app.get("/tags", async (req, res) => {
+      const tags = await tagsCollection.find({}).toArray();
+      res.send(tags);
+    });
+
+    // get all announcements
+    app.get("/announcements", async (req, res) => {
+      const announcements = await announcementsCollection.find().toArray();
+      res.send(announcements);
     });
 
     // Send a ping to confirm a successful connection
