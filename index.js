@@ -34,6 +34,7 @@ async function run() {
     const announcementsCollection = client
       .db("reactHubDb")
       .collection("announcements");
+    const postsCollection = client.db("reactHubDb").collection("posts");
 
     // announcements
     // post users
@@ -68,6 +69,12 @@ async function run() {
     app.get("/announcements", async (req, res) => {
       const announcements = await announcementsCollection.find().toArray();
       res.send(announcements);
+    });
+
+    // get all posts
+    app.get("/posts", async (req, res) => {
+      const posts = await postsCollection.find().toArray();
+      res.send(posts);
     });
 
     // Send a ping to confirm a successful connection
