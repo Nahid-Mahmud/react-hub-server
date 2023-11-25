@@ -74,10 +74,16 @@ async function run() {
     // get all posts
     app.get("/posts", async (req, res) => {
       try {
+        // getting the query data
+
         const sortQuery = req.query.sort;
-        const querydataSortField =
-          sortQuery === "popularity" ? "popularity" : "time";
+
+        // setting sort order to {} initially
+
         let sortOrder = {};
+
+        // setting sort order based on query data
+
         if (sortQuery === "popularity") {
           sortOrder = { popularity: -1 };
         } else {
@@ -98,10 +104,6 @@ async function run() {
             },
           ])
           .toArray();
-
-        // console.log(querydataSortField);
-        // console.log(postsbyAggregation);
-        // const posts = await postsCollection.find().sort({ time: -1 }).toArray();
         res.send(postsbyAggregation);
       } catch (err) {
         console.log(err);
