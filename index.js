@@ -197,10 +197,38 @@ async function run() {
       res.send(post);
     });
 
+    // update post vote count
+    app.put("/posts/:id",veryfyToken, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatePostVoteData = req.body;
+      console.log("vote data update", updatePostVoteData);
+      const updatePostVote = {
+        $set: {
+          upVoteCount: updatePostVoteData.upVoteCount,
+          downVoteCount: updatePostVoteData.downVoteCount,
+        },
+      };
+
+      const result = await postsCollection.updateOne(
+        filter,
+        updatePostVote,
+        options
+      );
+      res.send(result);
+    });
+
     // get all comments
     app.get("/comments", async (req, res) => {
       const comments = await commentsCollection.find().toArray();
       res.send(comments);
+    });
+    // post comments
+    app.post("/comments", veryfyToken, async (req, res) => {
+      const comment = req.body;
+      const result = await commentsCollection.insertOne(comment);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
