@@ -75,8 +75,21 @@ async function run() {
     app.get("/posts", async (req, res) => {
       try {
         // getting the query data
+        const size = 5;
+        const page = parseInt(req.query.page);
 
         const sortQuery = req.query.sort;
+        const search = req.query.search;
+        console.log("search value", search);
+        if (search) {
+          const query = { tags: search };
+          const data = await postsCollection
+            .find(query)
+            .skip(page * size)
+            .limit(size)
+            .toArray();
+          return res.send(data);
+        }
 
         // setting sort order to {} initially
 
@@ -89,7 +102,7 @@ async function run() {
         } else {
           sortOrder = { time: -1 };
         }
-        console.log(sortOrder);
+        // console.log(sortOrder);
         const postsbyAggregation = await postsCollection
           .aggregate([
             {
@@ -101,6 +114,12 @@ async function run() {
             },
             {
               $sort: sortOrder,
+            },
+            {
+              $skip: page * size,
+            },
+            {
+              $limit: size,
             },
           ])
           .toArray();
