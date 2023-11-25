@@ -11,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // mongodb codes
+// console.log( "access token", process.env.ACCESS_TOKEN_SECRET)
 
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_Pass}@cluster0.htztern.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -37,7 +38,15 @@ async function run() {
     const postsCollection = client.db("reactHubDb").collection("posts");
     const commentsCollection = client.db("reactHubDb").collection("comments");
 
-    // announcements
+    // jwt related apis
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "8760h",
+      });
+      res.send({ token });
+    });
+
     // post users
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -138,9 +147,9 @@ async function run() {
     });
 
     // get indivisuval post
-    app.get("/post/:id", async (req, res) => {
+    app.get("/posts/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: ObjectId(id) };
+      const query = { _id: new ObjectId(id) };
       const post = await postsCollection.findOne(query);
       res.send(post);
     });
