@@ -73,8 +73,40 @@ async function run() {
 
     // get all posts
     app.get("/posts", async (req, res) => {
-      const posts = await postsCollection.find().sort({ time: -1 }).toArray();
-      res.send(posts);
+      try {
+        const sortQuery = req.query.sort;
+        const querydataSortField =
+          sortQuery === "popularity" ? "popularity" : "time";
+        let sortOrder = {};
+        if (sortQuery === "popularity") {
+          sortOrder = { popularity: -1 };
+        } else {
+          sortOrder = { time: -1 };
+        }
+        console.log(sortOrder);
+        const postsbyAggregation = await postsCollection
+          .aggregate([
+            {
+              $addFields: {
+                popularity: {
+                  $subtract: ["$upVoteCount", "$downVoteCount"],
+                },
+              },
+            },
+            {
+              $sort: sortOrder,
+            },
+          ])
+          .toArray();
+
+        // console.log(querydataSortField);
+        // console.log(postsbyAggregation);
+        // const posts = await postsCollection.find().sort({ time: -1 }).toArray();
+        res.send(postsbyAggregation);
+      } catch (err) {
+        console.log(err);
+        res.send({ err });
+      }
     });
 
     // get all post count
