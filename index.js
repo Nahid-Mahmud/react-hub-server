@@ -35,6 +35,7 @@ async function run() {
       .db("reactHubDb")
       .collection("announcements");
     const postsCollection = client.db("reactHubDb").collection("posts");
+    const commentsCollection = client.db("reactHubDb").collection("comments");
 
     // announcements
     // post users
@@ -80,7 +81,7 @@ async function run() {
 
         const sortQuery = req.query.sort;
         const search = req.query.search;
-        console.log("search value", search);
+        // console.log("search value", search);
         if (search) {
           const query = { tags: search };
           const data = await postsCollection
@@ -134,6 +135,20 @@ async function run() {
     app.get("/posts-count", async (req, res) => {
       const postsCount = await postsCollection.estimatedDocumentCount();
       res.send({ postsCount });
+    });
+
+    // get indivisuval post
+    app.get("/post/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const post = await postsCollection.findOne(query);
+      res.send(post);
+    });
+
+    // get all comments
+    app.get("/comments", async (req, res) => {
+      const comments = await commentsCollection.find().toArray();
+      res.send(comments);
     });
 
     // Send a ping to confirm a successful connection
