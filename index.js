@@ -38,6 +38,49 @@ async function run() {
     const postsCollection = client.db("reactHubDb").collection("posts");
     const commentsCollection = client.db("reactHubDb").collection("comments");
 
+    // custom middlewares
+    // verify token
+    const veryfyToken = (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+      const token = req.headers.authorization.split(" ")[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(403).send({ message: "Forbidden" });
+        }
+        req.decoded = decoded;
+        next();
+      });
+    };
+
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const isAdmin = user.role === "admin";
+      if (!isAdmin) {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+      next();
+    };
+
+    // get admin data
+    app.get("/user/admin/:email", veryfyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(401).send({ message: "Unauthorized Request" });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      let admin = false;
+      if (user) {
+        admin = user.role === "admin";
+      }
+      res.send({ admin });
+    });
+
     // jwt related apis
     app.post("/jwt", (req, res) => {
       const user = req.body;
