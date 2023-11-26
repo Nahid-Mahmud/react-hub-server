@@ -134,7 +134,7 @@ async function run() {
         const sortQuery = req.query.sort;
         const search = req.query.search;
         // console.log("search value", search);
-        if (search) {
+        if (search !== "undefined") {
           const query = { tags: search };
           const data = await postsCollection
             .find(query)
@@ -198,7 +198,7 @@ async function run() {
     });
 
     // update post vote count
-    app.put("/posts/:id",veryfyToken, async (req, res) => {
+    app.put("/posts/:id", veryfyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
@@ -232,10 +232,10 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
