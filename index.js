@@ -81,6 +81,17 @@ async function run() {
       res.send({ admin });
     });
 
+    // get user data 
+    app.get("/user/:email", veryfyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(401).send({ message: "Unauthorized Request" });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send(user);
+    });
+
     // jwt related apis
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -229,6 +240,12 @@ async function run() {
       const comment = req.body;
       const result = await commentsCollection.insertOne(comment);
       res.send(result);
+    });
+    // get spesific comments
+    app.get("/comments/:email", async (req, res) => {
+      const query = { email: req.params.email };
+      const comments = await commentsCollection.find(query).toArray();
+      res.send({ totalUserComments: comments.length });
     });
 
     // Send a ping to confirm a successful connection
