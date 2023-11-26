@@ -255,6 +255,13 @@ async function run() {
       res.send(result);
     });
 
+    // post posts
+    app.post("/posts", veryfyToken, async (req, res) => {
+      const post = req.body;
+      const result = await postsCollection.insertOne(post);
+      res.send(result);
+    });
+
     // get all comments
     app.get("/comments", async (req, res) => {
       const comments = await commentsCollection.find().toArray();
