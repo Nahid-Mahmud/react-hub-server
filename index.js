@@ -104,7 +104,7 @@ async function run() {
       const updateRole = req.body;
       const updateUserRole = {
         $set: {
-          role: updateRole.role,
+          badge: updateRole.badge,
           paymentId: updateRole.paymentId,
         },
       };
