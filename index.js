@@ -274,7 +274,6 @@ async function run() {
 
     // delete post by id
     app.delete("/post/delete/:id", veryfyToken, async (req, res) => {
-    
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await postsCollection.deleteOne(query);
@@ -297,6 +296,25 @@ async function run() {
       const query = { email: req.params.email };
       const comments = await commentsCollection.find(query).toArray();
       res.send({ totalUserComments: comments.length });
+    });
+
+    // post reported comments
+    app.put("/comments/report/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateReportedComment = req.body;
+      const updateReport = {
+        $set: {
+          report: updateReportedComment.report,
+        },
+      };
+      const result = await commentsCollection.updateOne(
+        filter,
+        updateReport,
+        options
+      );
+      res.send(result);
     });
 
     // payment related api
