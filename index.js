@@ -94,6 +94,18 @@ async function run() {
       res.send(user);
     });
 
+    // get all user data
+    app.get(
+      "/users/admin/:email",
+      veryfyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const result = await usersCollection.find().toArray();
+
+        res.send(result);
+      }
+    );
+
     // update user role
     app.put("/user/role/:email", veryfyToken, async (req, res) => {
       const email = req.params.email;
@@ -146,6 +158,32 @@ async function run() {
       const users = await usersCollection.find({}).toArray();
       res.send(users);
     });
+
+    // make a user admin
+    app.put(
+      "/user/updaterole/:email",
+      veryfyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const data = req.body;
+        const name = data.name;
+        const role = data.role;
+        const filter = { name: name };
+        const options = { upsert: true };
+        const updateRole = {
+          $set: {
+            role: role,
+          },
+        };
+        const result = await usersCollection.updateOne(
+          filter,
+          updateRole,
+          options
+        );
+        console.log("User data for requesign update role", data);
+        res.send(result);
+      }
+    );
 
     // get all tags
 
