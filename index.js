@@ -219,7 +219,7 @@ async function run() {
       }
     });
 
-    // get all post count
+    // get total post count
     app.get("/posts-count", async (req, res) => {
       const postsCount = await postsCollection.estimatedDocumentCount();
       res.send({ postsCount });
@@ -259,6 +259,25 @@ async function run() {
     app.post("/posts", veryfyToken, async (req, res) => {
       const post = req.body;
       const result = await postsCollection.insertOne(post);
+      res.send(result);
+    });
+
+    // get indiviusal posts and post count by user email
+
+    app.get("/posts/user/:email", veryfyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const userCeatedPosts = await postsCollection.find(query).toArray();
+      const totalPostByUser = userCeatedPosts.length;
+      res.send({ userCeatedPosts, totalPostByUser });
+    });
+
+    // delete post by id
+    app.delete("/post/delete/:id", veryfyToken, async (req, res) => {
+    
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await postsCollection.deleteOne(query);
       res.send(result);
     });
 
