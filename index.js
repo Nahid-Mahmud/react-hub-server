@@ -267,7 +267,10 @@ async function run() {
     app.get("/posts/user/:email", veryfyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const userCeatedPosts = await postsCollection.find(query).toArray();
+      const userCeatedPosts = await postsCollection
+        .find(query)
+        .sort({ time: -1 })
+        .toArray();
       const totalPostByUser = userCeatedPosts.length;
       res.send({ userCeatedPosts, totalPostByUser });
     });
