@@ -349,6 +349,39 @@ async function run() {
       res.send({ totalUserComments: comments.length });
     });
 
+    // get reported comments
+    app.get(
+      "/comments/status/reported",
+      veryfyToken,
+      verifyAdmin,
+      async (req, res) => {
+        // Ref: https://docs.mongodb.com/manual/reference/operator/query/exists/
+
+        const reportedComments = await commentsCollection
+          .find({ report: { $exists: true } })
+          .toArray();
+        res.send(reportedComments);
+      }
+    );
+
+    // remove false reported comments field
+    app.put("/comments/report/remove/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      result = await commentsCollection.updateOne(filter, {
+        $unset: { report: "" },
+      });
+      res.send(result);
+    });
+
+    // delete comment
+    app.delete("/comments/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await commentsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // post reported comments
     app.put("/comments/report/:id", async (req, res) => {
       const id = req.params.id;
@@ -358,6 +391,7 @@ async function run() {
       const updateReport = {
         $set: {
           report: updateReportedComment.report,
+          reportedBy: updateReportedComment.reportedBy,
         },
       };
       const result = await commentsCollection.updateOne(
