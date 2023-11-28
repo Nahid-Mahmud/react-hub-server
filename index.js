@@ -100,7 +100,13 @@ async function run() {
       veryfyToken,
       verifyAdmin,
       async (req, res) => {
-        const result = await usersCollection.find().toArray();
+        const size = 10;
+        const page = parseInt(req.query.page);
+        const result = await usersCollection
+          .find()
+          .skip(page * size)
+          .limit(size)
+          .toArray();
 
         res.send(result);
       }
@@ -329,6 +335,21 @@ async function run() {
       res.send({ userCeatedPosts, totalPostByUser });
     });
 
+    app.get("/posts/user/table/:email", veryfyToken, async (req, res) => {
+      const size = 10;
+      const page = parseInt(req.query.page);
+      const email = req.params.email;
+      const query = { email: email };
+      const userCeatedPosts = await postsCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .sort({ time: -1 })
+        .toArray();
+      const totalPostByUser = userCeatedPosts.length;
+      res.send({ userCeatedPosts, totalPostByUser });
+    });
+
     // delete post by id
     app.delete("/post/delete/:id", veryfyToken, async (req, res) => {
       const id = req.params.id;
@@ -362,9 +383,13 @@ async function run() {
       verifyAdmin,
       async (req, res) => {
         // Ref: https://docs.mongodb.com/manual/reference/operator/query/exists/
+        const size = 10;
+        const page = parseInt(req.query.page);
 
         const reportedComments = await commentsCollection
           .find({ report: { $exists: true } })
+          .skip(page * size)
+          .limit(size)
           .toArray();
         res.send(reportedComments);
       }
@@ -423,15 +448,26 @@ async function run() {
     });
 
     // get statistics
-    app.get("/statistics", veryfyToken, verifyAdmin, async (req, res) => {
+    app.get("/statistics", veryfyToken, async (req, res) => {
+      const email = req.query.email;
       const totalUsers = await usersCollection.estimatedDocumentCount();
       const totalPosts = await postsCollection.estimatedDocumentCount();
       const totalComments = await commentsCollection.estimatedDocumentCount();
+      const reportedComments = await commentsCollection
+        .find({ report: { $exists: true } })
+        .toArray();
+      const reportedCommentsCount = reportedComments.length;
+      // find indivisual post count
+      const query = { email: email };
+      const userCeatedPosts = await postsCollection.find(query).toArray();
+      const totalPostByUser = userCeatedPosts.length;
 
       const statistics = {
         totalUsers,
         totalPosts,
         totalComments,
+        reportedCommentsCount,
+        totalPostByUser,
       };
       res.send(statistics);
     });
