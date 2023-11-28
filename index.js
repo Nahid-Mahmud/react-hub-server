@@ -194,8 +194,18 @@ async function run() {
 
     // get all announcements
     app.get("/announcements", async (req, res) => {
-      const announcements = await announcementsCollection.find().toArray();
+      const announcements = await announcementsCollection
+        .find()
+        .sort({ time: -1 })
+        .toArray();
       res.send(announcements);
+    });
+
+    // post announcements
+    app.post("/announcements", veryfyToken, verifyAdmin, async (req, res) => {
+      const announcement = req.body;
+      const result = await announcementsCollection.insertOne(announcement);
+      res.send(result);
     });
 
     // get all posts
