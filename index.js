@@ -472,6 +472,7 @@ async function run() {
       res.send(statistics);
     });
 
+    // time stamp 2.16 29/11/2023
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log(
