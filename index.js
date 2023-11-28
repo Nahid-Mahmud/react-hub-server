@@ -191,6 +191,12 @@ async function run() {
       const tags = await tagsCollection.find({}).toArray();
       res.send(tags);
     });
+    // post tags
+    app.post("/tags", veryfyToken, verifyAdmin, async (req, res) => {
+      const tag = req.body;
+      const result = await tagsCollection.insertOne(tag);
+      res.send(result);
+    });
 
     // get all announcements
     app.get("/announcements", async (req, res) => {
@@ -414,6 +420,20 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+
+    // get statistics
+    app.get("/statistics", veryfyToken, verifyAdmin, async (req, res) => {
+      const totalUsers = await usersCollection.estimatedDocumentCount();
+      const totalPosts = await postsCollection.estimatedDocumentCount();
+      const totalComments = await commentsCollection.estimatedDocumentCount();
+
+      const statistics = {
+        totalUsers,
+        totalPosts,
+        totalComments,
+      };
+      res.send(statistics);
     });
 
     // Send a ping to confirm a successful connection
